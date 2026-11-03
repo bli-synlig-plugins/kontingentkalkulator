@@ -2,8 +2,9 @@
 
 WordPress-plugin med Flatsome UX Builder-elementer som regner ut reell fagforeningskontingent ut fra månedslønn eller timelønn, inkludert skattefradrag og valgfrie forsikringer.
 
-**Versjon:** 1.0.1  
-**Forfatter:** Benjamin Pedersen
+**Versjon:** 1.0.2  
+**Forfatter:** Benjamin Pedersen  
+**Dokumentasjon:** [wordpress-plugins-docs](https://wordpress-plugins-docs.vercel.app/plugins/kontingentkalkulator)
 
 ## Krav
 
