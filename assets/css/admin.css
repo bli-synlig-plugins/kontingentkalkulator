@@ -1,0 +1,426 @@
+.kk-admin {
+	--kk-admin-bg: #fff;
+	--kk-admin-ink: #1d2327;
+	--kk-admin-mut: #646970;
+	--kk-admin-line: #dcdcde;
+	--kk-admin-acc: #2271b1;
+	--kk-admin-accbg: #f0f6fc;
+	--kk-admin-dng: #b32d2e;
+	--kk-admin-ok: #1a7f4b;
+	max-width: 1280px;
+	padding-bottom: 96px;
+}
+
+.kk-admin-lead {
+	color: var(--kk-admin-mut);
+	max-width: 72em;
+	margin: 0 0 22px;
+}
+
+.kk-admin-layout {
+	display: grid;
+	grid-template-columns: 180px minmax(0, 1fr) 440px;
+	gap: 24px;
+	align-items: start;
+}
+
+.kk-admin-tabs,
+.kk-admin-preview {
+	position: sticky;
+	top: 32px;
+}
+
+.kk-admin-tabs {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.kk-admin-tabs button {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	margin: 0;
+	padding: 9px 12px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--kk-admin-mut);
+	font-size: 13px;
+	font-weight: 500;
+	text-align: left;
+	cursor: pointer;
+}
+
+.kk-admin-tabs button:hover {
+	background: var(--kk-admin-bg);
+	color: var(--kk-admin-ink);
+}
+
+.kk-admin-tabs button[aria-selected="true"] {
+	background: var(--kk-admin-accbg);
+	color: var(--kk-admin-acc);
+}
+
+.kk-admin-badge {
+	display: inline-block;
+	min-width: 1.4em;
+	padding: 0 8px;
+	border-radius: 10px;
+	background: var(--kk-admin-line);
+	color: var(--kk-admin-ink);
+	font-size: 12px;
+	font-weight: 600;
+	text-align: center;
+}
+
+.kk-admin-card {
+	background: var(--kk-admin-bg);
+	border: 1px solid var(--kk-admin-line);
+	border-radius: 8px;
+	margin-bottom: 16px;
+}
+
+.kk-admin-card > header {
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--kk-admin-line);
+}
+
+.kk-admin-card > header h2 {
+	font-size: 16px;
+	margin: 0;
+}
+
+.kk-admin-card > header p {
+	margin: 4px 0 0;
+	color: var(--kk-admin-mut);
+	font-size: 13px;
+}
+
+.kk-admin-card__body {
+	padding: 4px 20px;
+}
+
+.kk-admin-row {
+	display: grid;
+	grid-template-columns: 200px minmax(0, 1fr);
+	gap: 8px 20px;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--kk-admin-line);
+}
+
+.kk-admin-row:last-child {
+	border-bottom: 0;
+}
+
+.kk-admin-row label {
+	font-weight: 600;
+	font-size: 14px;
+	padding-top: 8px;
+}
+
+.kk-admin-row label small {
+	display: block;
+	margin-top: 2px;
+	color: var(--kk-admin-mut);
+	font-weight: 400;
+	font-size: 12.5px;
+}
+
+.kk-admin-row input[type="text"],
+.kk-admin-row input[type="number"],
+.kk-admin-row textarea,
+.kk-ins-form input[type="text"],
+.kk-ins-form input[type="number"],
+.kk-ins-form textarea {
+	width: 100%;
+	max-width: 100%;
+}
+
+.kk-admin-suffix {
+	position: relative;
+	max-width: 220px;
+}
+
+.kk-admin-suffix input {
+	padding-right: 48px;
+}
+
+.kk-admin-suffix span {
+	position: absolute;
+	right: 12px;
+	top: 8px;
+	color: var(--kk-admin-mut);
+	pointer-events: none;
+}
+
+.kk-admin-hint {
+	color: var(--kk-admin-mut);
+	font-size: 13px;
+	margin: 0 0 14px;
+}
+
+.kk-admin-error {
+	color: var(--kk-admin-dng);
+	font-size: 12.5px;
+	margin: 6px 0 0;
+}
+
+.kk-admin-tools {
+	margin-bottom: 14px;
+}
+
+.kk-admin-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.kk-admin-chip {
+	margin: 0;
+	padding: 2px 7px;
+	border: 0;
+	border-radius: 4px;
+	background: var(--kk-admin-accbg);
+	color: var(--kk-admin-acc);
+	font-family: ui-monospace, Consolas, monospace;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.kk-ins-form {
+	padding: 4px 20px 16px;
+	background: var(--kk-admin-accbg);
+	border-bottom: 1px solid var(--kk-admin-line);
+}
+
+.kk-ins-form__grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px 16px;
+	padding: 16px 0 0;
+}
+
+.kk-ins-form__full,
+.kk-ins-form__actions {
+	grid-column: 1 / -1;
+}
+
+.kk-ins-form label {
+	display: block;
+	margin-bottom: 4px;
+	font-weight: 600;
+	font-size: 13.5px;
+}
+
+.kk-ins-form__actions {
+	display: flex;
+	gap: 8px;
+}
+
+.kk-ins-item {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 6px 16px;
+	align-items: center;
+	padding: 14px 20px;
+	border-bottom: 1px solid var(--kk-admin-line);
+}
+
+.kk-ins-item.is-off {
+	opacity: 0.55;
+}
+
+.kk-ins-item h3 {
+	margin: 0;
+	font-size: 15px;
+}
+
+.kk-ins-item p {
+	margin: 2px 0 0;
+	color: var(--kk-admin-mut);
+	font-size: 13px;
+}
+
+.kk-ins-item__price {
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.kk-ins-item__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	grid-column: 1 / -1;
+}
+
+.kk-ins-empty {
+	padding: 30px 20px;
+	text-align: center;
+	color: var(--kk-admin-mut);
+}
+
+.kk-ins-sum {
+	display: flex;
+	justify-content: space-between;
+	padding: 14px 20px;
+	background: #f6f7f7;
+	border-radius: 0 0 8px 8px;
+	font-weight: 600;
+}
+
+.kk-admin-preview h3 {
+	margin: 0 0 8px;
+	color: var(--kk-admin-mut);
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.kk-admin-calc.kk-calculator {
+	--kk-py: 22px;
+	--kk-px: 18px;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	border: 1px solid var(--kk-admin-line);
+	border-radius: 8px;
+	overflow: hidden;
+	color: #1c1a3d;
+	font-size: 13.5px;
+}
+
+.kk-admin-calc .kk-input {
+	background: #e9e9e9;
+}
+
+.kk-admin-calc .kk-result {
+	background: #c5d4a6;
+}
+
+.kk-admin-calc .kk-input__title,
+.kk-admin-calc .kk-result__title {
+	font-size: 21px;
+}
+
+.kk-admin-calc .kk-hero__value {
+	font-size: 42px;
+}
+
+.kk-admin-calc .kk-row[hidden],
+.kk-admin-calc .kk-info__btn[hidden],
+.kk-admin-calc .kk-info__text[hidden] {
+	display: none !important;
+}
+
+.kk-admin-calc .kk-info__btn {
+	width: 15px;
+	height: 15px;
+	border: 1.2px solid currentColor;
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 1;
+	opacity: 1;
+}
+
+.kk-admin-hl {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+	background-color: rgba(255, 235, 120, 0.8);
+	border-radius: 3px;
+}
+
+.kk-admin-preview__note {
+	color: var(--kk-admin-mut);
+	font-size: 12.5px;
+	margin-top: 8px;
+}
+
+.kk-admin-bar {
+	position: fixed;
+	left: 160px;
+	right: 0;
+	bottom: 0;
+	z-index: 20;
+	background: var(--kk-admin-bg);
+	border-top: 1px solid var(--kk-admin-line);
+	padding: 12px 20px;
+}
+
+.folded .kk-admin-bar {
+	left: 36px;
+}
+
+.kk-admin-bar__inner {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	max-width: 1240px;
+}
+
+#kk-admin-status {
+	flex: 1;
+	color: var(--kk-admin-mut);
+	font-size: 13.5px;
+}
+
+#kk-admin-status.is-dirty {
+	color: var(--kk-admin-dng);
+}
+
+#kk-admin-status.is-ok {
+	color: var(--kk-admin-ok);
+}
+
+@media screen and (max-width: 960px) {
+	.auto-fold .kk-admin-bar {
+		left: 36px;
+	}
+}
+
+@media (max-width: 1100px) {
+	.kk-admin-layout {
+		grid-template-columns: 160px minmax(0, 1fr);
+	}
+
+	.kk-admin-preview {
+		position: static;
+		grid-column: 1 / -1;
+	}
+}
+
+@media (max-width: 782px) {
+	.kk-admin-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.kk-admin-tabs {
+		position: static;
+		flex-direction: row;
+		overflow-x: auto;
+	}
+
+	.kk-admin-tabs button {
+		white-space: nowrap;
+		width: auto;
+	}
+
+	.kk-admin-row {
+		grid-template-columns: 1fr;
+	}
+
+	.kk-admin-row label {
+		padding-top: 0;
+	}
+
+	.kk-ins-form__grid {
+		grid-template-columns: 1fr;
+	}
+
+	.kk-admin-bar {
+		left: 0;
+	}
+
+	.kk-admin-calc.kk-calculator {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
