@@ -106,24 +106,7 @@ class KK_Result extends KK_Element
             'yearly' => '–',
         );
 
-        $result = KK_Calc::compute(array_merge(KK_Plugin::rates(), array(
-            'mode' => 'monthly',
-            'monthly' => 0,
-            'insurance' => KK_Settings::insurance_sum(),
-        )));
-
-        if ($result === null) {
-            return $empty;
-        }
-
-        return array(
-            'salary' => KK_Calc::format($result['salary'], 0),
-            'dues' => KK_Calc::format($result['dues'], 2),
-            'deduction' => KK_Calc::format_signed($result['deduction'], 2),
-            'insurance' => KK_Calc::format_signed($result['insurance'], 2),
-            'reell' => KK_Calc::format(round($result['reell']), 0),
-            'yearly' => KK_Calc::format(round($result['yearly']), 0),
-        );
+        return $empty;
     }
 
     private function row(

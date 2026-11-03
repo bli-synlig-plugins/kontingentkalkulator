@@ -2,7 +2,7 @@
 
 WordPress-plugin med Flatsome UX Builder-elementer som regner ut reell fagforeningskontingent ut fra månedslønn eller timelønn, inkludert skattefradrag og valgfrie forsikringer.
 
-**Versjon:** 1.0.0  
+**Versjon:** 1.0.1  
 **Forfatter:** Benjamin Pedersen
 
 ## Krav
@@ -26,7 +26,7 @@ Gå til **Kontingentkalkulator** i wp-admin. Satser, tekster og forsikringer gje
 - **Tekster:** overskrifter, feltetiketter og suffikser, gruppert som på nettsiden.
 - **Forklaringer:** tekst bak (i)-knappene. `{sats}`, `{fradrag}` og `{arsgrense}` erstattes med verdiene under Satser.
 
-Forhåndsvisningen til høyre oppdateres mens du skriver.
+Forhåndsvisningen til høyre viser lønn over resultatet. Den oppdateres mens du skriver, og regner først ut når lønnen er større enn 0.
 
 ## UX Builder
 

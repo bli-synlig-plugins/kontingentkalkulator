@@ -263,12 +263,12 @@
 		if (previewMode === 'hourly') {
 			var hourly = number($('kk-preview-hourly') && $('kk-preview-hourly').value);
 			var hours = number($('kk-preview-hours') && $('kk-preview-hours').value);
-			if (hourly != null && hours != null && hourly >= 0 && hours > 0) {
+			if (hourly != null && hours != null && hourly > 0 && hours > 0) {
 				salary = hourly * hours * 52 / 12;
 			}
 		} else {
 			salary = number($('kk-preview-monthly') && $('kk-preview-monthly').value);
-			if (salary != null && salary < 0) {
+			if (salary != null && salary <= 0) {
 				salary = null;
 			}
 		}
@@ -279,7 +279,6 @@
 		var insLabel = textValue('label_insurance');
 		if (insRow) {
 			insRow.hidden = !(items.length && insLabel);
-			setOut('insurance', formatSigned(insSum, 2));
 			var insInfo = preview.querySelector('[data-kk-preview-info-text="insurance"]');
 			if (insInfo) {
 				insInfo.innerHTML = escapeHtml(insuranceInfoText()).replace(/\n/g, '<br>');
@@ -303,7 +302,7 @@
 		});
 
 		if (salary == null || satsPercent == null || fradragPercent == null || arsgrense == null) {
-			['reell', 'salary', 'dues', 'deduction', 'yearly'].forEach(function (key) {
+			['reell', 'salary', 'dues', 'deduction', 'insurance', 'yearly'].forEach(function (key) {
 				setOut(key, '–');
 			});
 			return;
@@ -318,6 +317,7 @@
 		setOut('salary', formatSalary(salary));
 		setOut('dues', format(dues, 2));
 		setOut('deduction', formatSigned(yearlyDeduction / 12, 2));
+		setOut('insurance', formatSigned(insSum, 2));
 		setOut('yearly', format(Math.round(reell * 12), 0));
 	}
 

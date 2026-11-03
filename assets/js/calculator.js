@@ -56,12 +56,12 @@
 		var salary;
 		var hoursMonth = null;
 		if (input.mode === 'hourly') {
-			if (input.hourly == null || input.hours == null || input.hourly < 0 || input.hours <= 0) {
+			if (input.hourly == null || input.hours == null || input.hourly <= 0 || input.hours <= 0) {
 				return null;
 			}
 			hoursMonth = input.hours * 52 / 12;
 			salary = input.hourly * hoursMonth;
-		} else if (input.monthly == null || input.monthly < 0) {
+		} else if (input.monthly == null || input.monthly <= 0) {
 			return null;
 		} else {
 			salary = input.monthly;
@@ -146,7 +146,7 @@
 	}
 
 	function emptyResult(root) {
-		['reell', 'salary', 'dues', 'deduction', 'yearly'].forEach(function (key) {
+		['reell', 'salary', 'dues', 'deduction', 'insurance', 'yearly'].forEach(function (key) {
 			setText(root, key, '–');
 		});
 	}
@@ -183,6 +183,7 @@
 		setText(root, 'salary', formatSalary(result.salary));
 		setText(root, 'dues', format(result.dues, 2));
 		setText(root, 'deduction', formatSigned(result.deduction, 2));
+		setText(root, 'insurance', formatSigned(result.insurance, 2));
 		setText(root, 'yearly', format(Math.round(result.yearly), 0));
 	}
 

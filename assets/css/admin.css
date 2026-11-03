@@ -281,7 +281,7 @@
 .kk-admin-calc.kk-calculator {
 	--kk-py: 22px;
 	--kk-px: 18px;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	grid-template-columns: minmax(0, 1fr);
 	border: 1px solid var(--kk-admin-line);
 	border-radius: 8px;
 	overflow: hidden;

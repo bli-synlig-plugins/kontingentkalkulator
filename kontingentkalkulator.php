@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Kontingentkalkulator
  * Description:         Flatsome UX Builder-element som regner ut reell kontingent ut fra månedslønn eller timelønn.
- * Version:             1.0.0
+ * Version:             1.0.1
  * Requires at least:   6.6
  * Requires PHP:        8.1
  * Author:              Benjamin
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KK_VERSION', '1.0.0');
+define('KK_VERSION', '1.0.1');
 define('KK_PLUGIN_FILE', __FILE__);
 define('KK_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('KK_PLUGIN_URL', plugin_dir_url(__FILE__));

@@ -22,14 +22,14 @@ class KK_Calc
         if ($mode === 'hourly') {
             $hourly = self::number($input['hourly'] ?? null);
             $hours = self::number($input['hours'] ?? null);
-            if ($hourly === null || $hours === null || $hourly < 0 || $hours <= 0) {
+            if ($hourly === null || $hours === null || $hourly <= 0 || $hours <= 0) {
                 return null;
             }
             $hoursMonth = $hours * 52 / 12;
             $salary = $hourly * $hoursMonth;
         } else {
             $salary = self::number($input['monthly'] ?? null);
-            if ($salary === null || $salary < 0) {
+            if ($salary === null || $salary <= 0) {
                 return null;
             }
         }

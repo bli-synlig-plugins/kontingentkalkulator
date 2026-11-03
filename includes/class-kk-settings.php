@@ -479,14 +479,14 @@ class KK_Settings
                                 <div data-kk-preview-fields="monthly">
                                     <label class="kk-label" data-kk-hl="label_monthly"><?php echo esc_html($copy['label_monthly']); ?></label>
                                     <div class="kk-control">
-                                        <input class="kk-control__input" id="kk-preview-monthly" type="text" inputmode="decimal" value="29000" autocomplete="off">
+                                        <input class="kk-control__input" id="kk-preview-monthly" type="text" inputmode="decimal" value="0" autocomplete="off">
                                         <span class="kk-control__suffix" data-kk-hl="suffix_kr"><?php echo esc_html($copy['suffix_kr']); ?></span>
                                     </div>
                                 </div>
                                 <div data-kk-preview-fields="hourly" hidden>
                                     <label class="kk-label" data-kk-hl="label_hourly"><?php echo esc_html($copy['label_hourly']); ?></label>
                                     <div class="kk-control">
-                                        <input class="kk-control__input" id="kk-preview-hourly" type="text" inputmode="decimal" value="180" autocomplete="off">
+                                        <input class="kk-control__input" id="kk-preview-hourly" type="text" inputmode="decimal" value="0" autocomplete="off">
                                         <span class="kk-control__suffix" data-kk-hl="suffix_kr"><?php echo esc_html($copy['suffix_kr']); ?></span>
                                     </div>
                                     <label class="kk-label" data-kk-hl="label_hours"><?php echo esc_html($copy['label_hours']); ?></label>
