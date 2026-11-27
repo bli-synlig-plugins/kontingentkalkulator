@@ -276,3 +276,176 @@
 		}).observe(document.documentElement, { childList: true, subtree: true });
 	}
 })();
+
+(function () {
+	var bound = typeof WeakSet === 'function' ? new WeakSet() : null;
+
+	function number(value) {
+		if (value == null) {
+			return null;
+		}
+		if (typeof value === 'number') {
+			return Number.isFinite(value) ? value : null;
+		}
+		var raw = String(value).trim().replace(/\u00a0/g, '').replace(/\s/g, '').replace(',', '.');
+		if (raw === '' || Number.isNaN(Number(raw))) {
+			return null;
+		}
+		var parsed = Number(raw);
+		return Number.isFinite(parsed) ? parsed : null;
+	}
+
+	function format(value, decimals) {
+		if (value == null || !Number.isFinite(value)) {
+			return '0';
+		}
+		return new Intl.NumberFormat('nb-NO', {
+			minimumFractionDigits: decimals,
+			maximumFractionDigits: decimals,
+		}).format(value);
+	}
+
+	function formatMoney(amount, currency) {
+		var decimals = Math.abs(amount - Math.round(amount)) < 0.005 ? 0 : 2;
+		return String(currency || 'kr').trim() + ' ' + format(amount, decimals);
+	}
+
+	function currencyOf(root) {
+		var node = root.querySelector('.kk-benefits__currency');
+		return node ? String(node.textContent || '').trim() : 'kr';
+	}
+
+	function amountOf(row) {
+		var amount = number(row.getAttribute('data-kk-amount'));
+		return amount != null ? amount : 0;
+	}
+
+	function isOn(row) {
+		var button = row.querySelector('[data-kk-ben-switch]');
+		return !!(button && button.getAttribute('aria-checked') === 'true');
+	}
+
+	function setOn(row, on) {
+		var button = row.querySelector('[data-kk-ben-switch]');
+		if (button) {
+			button.setAttribute('aria-checked', on ? 'true' : 'false');
+		}
+		var amount = row.querySelector('[data-kk-ben-amount]');
+		if (amount) {
+			amount.hidden = !on;
+		}
+	}
+
+	function render(root) {
+		var currency = currencyOf(root);
+		var grand = 0;
+		root.querySelectorAll('[data-kk-ben-cat]').forEach(function (cat) {
+			var sum = 0;
+			cat.querySelectorAll('[data-kk-ben-row]').forEach(function (row) {
+				if (isOn(row)) {
+					sum += amountOf(row);
+				}
+			});
+			grand += sum;
+			var sumNode = cat.querySelector('[data-kk-ben-cat-sum]');
+			if (sumNode) {
+				sumNode.textContent = formatMoney(sum, currency);
+			}
+		});
+		var total = root.querySelector('[data-kk-ben-total]');
+		if (total) {
+			total.textContent = format(Math.round(grand), 0);
+		}
+	}
+
+	function toggle(root, row) {
+		if (!row) {
+			return;
+		}
+		var next = !isOn(row);
+		var group = String(row.getAttribute('data-kk-group') || '').trim();
+		setOn(row, next);
+		if (next && group) {
+			var cat = row.closest('[data-kk-ben-cat]');
+			if (cat) {
+				cat.querySelectorAll('[data-kk-ben-row]').forEach(function (other) {
+					if (other === row) {
+						return;
+					}
+					if (String(other.getAttribute('data-kk-group') || '').trim() === group) {
+						setOn(other, false);
+					}
+				});
+			}
+		}
+		render(root);
+	}
+
+	function toggleInfo(button) {
+		var expanded = button.getAttribute('aria-expanded') === 'true';
+		var panelId = button.getAttribute('aria-controls');
+		var panel = panelId ? document.getElementById(panelId) : null;
+		button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+		if (panel) {
+			panel.hidden = expanded;
+		}
+	}
+
+	function bind(root) {
+		if (!root || (bound && bound.has(root)) || root.getAttribute('data-kk-ben-ready') === '1') {
+			return;
+		}
+		if (bound) {
+			bound.add(root);
+		}
+		root.setAttribute('data-kk-ben-ready', '1');
+
+		root.addEventListener('click', function (event) {
+			var infoBtn = event.target.closest('[data-kk-info]');
+			if (infoBtn && root.contains(infoBtn)) {
+				event.preventDefault();
+				toggleInfo(infoBtn);
+				return;
+			}
+
+			var switchBtn = event.target.closest('[data-kk-ben-switch]');
+			if (!switchBtn || !root.contains(switchBtn)) {
+				return;
+			}
+			event.preventDefault();
+			toggle(root, switchBtn.closest('[data-kk-ben-row]'));
+		});
+
+		render(root);
+	}
+
+	function scan(context) {
+		(context || document).querySelectorAll('[data-kk-benefits]').forEach(bind);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', function () {
+			scan(document);
+		});
+	} else {
+		scan(document);
+	}
+
+	if (typeof MutationObserver === 'function') {
+		new MutationObserver(function (mutations) {
+			mutations.forEach(function (mutation) {
+				mutation.addedNodes.forEach(function (node) {
+					if (node.nodeType !== 1) {
+						return;
+					}
+					if (node.hasAttribute && node.hasAttribute('data-kk-benefits')) {
+						bind(node);
+					}
+					if (node.querySelectorAll) {
+						scan(node);
+					}
+				});
+			});
+		}).observe(document.documentElement, { childList: true, subtree: true });
+	}
+})();

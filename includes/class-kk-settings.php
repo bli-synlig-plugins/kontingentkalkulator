@@ -113,6 +113,43 @@ class KK_Settings
     }
 
     /**
+     * @return list<array{id: string, name: string, description: string, link_text: string, link_url: string, enabled: bool, items: list<array{id: string, name: string, description: string, amount: float, default_on: bool, enabled: bool, exclusive_group: string}>}>
+     */
+    public static function benefit_categories(): array
+    {
+        $stored = get_option(self::OPTION, array());
+        $stored = is_array($stored) ? $stored : array();
+
+        return self::sanitize_benefit_categories($stored['benefit_categories'] ?? array());
+    }
+
+    /**
+     * @return list<array{id: string, name: string, description: string, link_text: string, link_url: string, enabled: bool, items: list<array{id: string, name: string, description: string, amount: float, default_on: bool, enabled: bool, exclusive_group: string}>}>
+     */
+    public static function active_benefit_categories(): array
+    {
+        $out = array();
+        foreach (self::benefit_categories() as $category) {
+            if (!$category['enabled']) {
+                continue;
+            }
+            $items = array();
+            foreach ($category['items'] as $item) {
+                if ($item['enabled']) {
+                    $items[] = $item;
+                }
+            }
+            if ($items === []) {
+                continue;
+            }
+            $category['items'] = self::resolve_exclusive_defaults($items);
+            $out[] = $category;
+        }
+
+        return $out;
+    }
+
+    /**
      * @return array<string, string>
      */
     public static function strings(): array
@@ -154,7 +191,7 @@ class KK_Settings
     }
 
     /**
-     * @return array{sats_percent: float, fradrag_percent: float, arsgrense: float, insurances: array, strings: array<string, string>}
+     * @return array{sats_percent: float, fradrag_percent: float, arsgrense: float, insurances: array, benefit_categories: array, strings: array<string, string>}
      */
     public static function defaults(): array
     {
@@ -163,6 +200,7 @@ class KK_Settings
             'fradrag_percent' => 22.0,
             'arsgrense' => 8700.0,
             'insurances' => array(),
+            'benefit_categories' => array(),
             'strings' => self::default_strings(),
         );
     }
@@ -197,6 +235,8 @@ class KK_Settings
             'info_dues' => 'Kontingenten er {sats} % av lønnen.',
             'info_deduction' => 'Fagforeningskontingent gir skattefradrag. Fradraget er {fradrag} % av kontingenten, begrenset til {arsgrense} kr per år.',
             'info_yearly' => 'Reell kostnad er kontingenten minus skattefradraget og forsikringer.',
+            'benefits_title' => 'Dette kan du spare i året:',
+            'benefits_currency' => 'kr',
         );
     }
 
@@ -227,6 +267,8 @@ class KK_Settings
             'row_suffix' => __('Suffiks rader', 'kontingentkalkulator'),
             'note' => __('Bunntekst', 'kontingentkalkulator'),
             'info_button' => __('(i)-knapp, etikett', 'kontingentkalkulator'),
+            'benefits_title' => __('Overskrift (fordeler)', 'kontingentkalkulator'),
+            'benefits_currency' => __('Valuta (fordeler)', 'kontingentkalkulator'),
         );
     }
 
@@ -244,7 +286,7 @@ class KK_Settings
 
     /**
      * @param mixed $value
-     * @return array{sats_percent: float, fradrag_percent: float, arsgrense: float, insurances: array, strings: array<string, string>}
+     * @return array{sats_percent: float, fradrag_percent: float, arsgrense: float, insurances: array, benefit_categories: array, strings: array<string, string>}
      */
     public static function sanitize($value): array
     {
@@ -265,6 +307,7 @@ class KK_Settings
             'fradrag_percent' => self::clamp_percent($value['fradrag_percent'] ?? 22, 22),
             'arsgrense' => max(0, (float) (KK_Calc::number($value['arsgrense'] ?? 8700) ?? 8700)),
             'insurances' => self::sanitize_insurances($value['insurances'] ?? array()),
+            'benefit_categories' => self::sanitize_benefit_categories($value['benefit_categories'] ?? array()),
             'strings' => $strings,
         );
     }
@@ -311,6 +354,20 @@ class KK_Settings
                 'deleteConfirm' => __('Slette «%s»?', 'kontingentkalkulator'),
                 'empty' => __('Ingen forsikringer ennå. Trykk «Legg til forsikring» for å starte.', 'kontingentkalkulator'),
                 'perMonth' => __('kr/mnd', 'kontingentkalkulator'),
+                'addCategory' => __('Legg til kategori', 'kontingentkalkulator'),
+                'saveCategory' => __('Lagre kategori', 'kontingentkalkulator'),
+                'addBenefit' => __('Legg til fordel', 'kontingentkalkulator'),
+                'saveBenefit' => __('Lagre fordel', 'kontingentkalkulator'),
+                'emptyCategories' => __('Ingen kategorier ennå. Trykk «Legg til kategori» for å starte.', 'kontingentkalkulator'),
+                'emptyBenefits' => __('Ingen fordeler i denne kategorien.', 'kontingentkalkulator'),
+                'perYear' => __('kr/år', 'kontingentkalkulator'),
+                'defaultOn' => __('Huket av som standard', 'kontingentkalkulator'),
+                'exclusive' => __('Eksklusiv gruppe', 'kontingentkalkulator'),
+                'deleteCategoryConfirm' => __('Slette «%s» og alle fordelene i kategorien?', 'kontingentkalkulator'),
+                'addBenefitIn' => __('Legg til fordel', 'kontingentkalkulator'),
+                'addParagraph' => __('Legg til avsnitt', 'kontingentkalkulator'),
+                'removeParagraph' => __('Fjern avsnitt', 'kontingentkalkulator'),
+                'paragraphPlaceholder' => __('Avsnitt som vises under kategorinavnet', 'kontingentkalkulator'),
             ),
         ));
     }
@@ -329,14 +386,15 @@ class KK_Settings
         $defaults = self::default_strings();
         $labels = self::string_labels();
         $insurances = self::insurances();
+        $benefitCategories = self::benefit_categories();
         $copy = self::strings();
         $option = self::OPTION;
         $fradragDecimals = abs($settings['fradrag_percent'] - round($settings['fradrag_percent'])) < 0.05 ? 0 : 1;
         ?>
         <div class="wrap kk-admin">
             <h1><?php echo esc_html__('Kontingentkalkulator', 'kontingentkalkulator'); ?></h1>
-            <p class="kk-admin-lead"><?php echo esc_html__('Satser, tekster og forsikringer gjelder alle kalkulatorer. Farger og standardverdier settes på elementet i UX Builder. Forhåndsvisningen til høyre oppdateres mens du skriver, og feltet du står i lyses opp.', 'kontingentkalkulator'); ?></p>
-            <form action="options.php" method="post" id="kk-admin-form">
+            <p class="kk-admin-lead"><?php echo esc_html__('Satser, tekster, forsikringer og fordeler gjelder alle kalkulatorer. Farger og standardverdier settes på elementet i UX Builder. Forhåndsvisningen til høyre oppdateres mens du skriver, og feltet du står i lyses opp.', 'kontingentkalkulator'); ?></p>
+            <form action="options.php" method="post" id="kk-admin-form" novalidate>
                 <?php settings_fields(self::PAGE); ?>
                 <input
                     type="hidden"
@@ -344,10 +402,17 @@ class KK_Settings
                     id="kk-insurances"
                     value="<?php echo esc_attr((string) wp_json_encode($insurances, JSON_UNESCAPED_UNICODE)); ?>"
                 >
+                <input
+                    type="hidden"
+                    name="<?php echo esc_attr($option); ?>[benefit_categories]"
+                    id="kk-benefit-categories"
+                    value="<?php echo esc_attr((string) wp_json_encode($benefitCategories, JSON_UNESCAPED_UNICODE)); ?>"
+                >
                 <div class="kk-admin-layout">
                     <nav class="kk-admin-tabs" role="tablist" aria-label="<?php echo esc_attr__('Innstillinger', 'kontingentkalkulator'); ?>">
                         <button type="button" role="tab" id="kk-tab-satser" data-kk-tab="satser" aria-selected="true" aria-controls="kk-panel-satser"><?php echo esc_html__('Satser', 'kontingentkalkulator'); ?></button>
                         <button type="button" role="tab" id="kk-tab-forsikringer" data-kk-tab="forsikringer" aria-selected="false" aria-controls="kk-panel-forsikringer"><?php echo esc_html__('Forsikringer', 'kontingentkalkulator'); ?> <span class="kk-admin-badge" data-kk-ins-count><?php echo esc_html((string) count($insurances)); ?></span></button>
+                        <button type="button" role="tab" id="kk-tab-fordeler" data-kk-tab="fordeler" aria-selected="false" aria-controls="kk-panel-fordeler"><?php echo esc_html__('Fordeler', 'kontingentkalkulator'); ?> <span class="kk-admin-badge" data-kk-ben-count><?php echo esc_html((string) count($benefitCategories)); ?></span></button>
                         <button type="button" role="tab" id="kk-tab-tekster" data-kk-tab="tekster" aria-selected="false" aria-controls="kk-panel-tekster"><?php echo esc_html__('Tekster', 'kontingentkalkulator'); ?></button>
                         <button type="button" role="tab" id="kk-tab-forklaringer" data-kk-tab="forklaringer" aria-selected="false" aria-controls="kk-panel-forklaringer"><?php echo esc_html__('Forklaringer', 'kontingentkalkulator'); ?></button>
                     </nav>
@@ -426,6 +491,83 @@ class KK_Settings
                             </div>
                         </section>
 
+                        <section class="kk-admin-panel" id="kk-panel-fordeler" role="tabpanel" aria-labelledby="kk-tab-fordeler" hidden>
+                            <div class="kk-admin-tools">
+                                <button type="button" class="button button-primary" id="kk-cat-add"><?php echo esc_html__('Legg til kategori', 'kontingentkalkulator'); ?></button>
+                            </div>
+                            <div class="kk-admin-card">
+                                <header>
+                                    <h2><?php echo esc_html__('Fordeler i fordelskalkulatoren', 'kontingentkalkulator'); ?></h2>
+                                    <p><?php echo esc_html__('Lag først en hovedkategori, for eksempel Forsikringer. Deretter legger du inn fordelene som kan hukes av på nettsiden. Beløpene er årlig sparing. Fordeler med samme eksklusive gruppe utelukker hverandre.', 'kontingentkalkulator'); ?></p>
+                                </header>
+                                <div class="kk-ins-form" id="kk-cat-form" hidden>
+                                    <div class="kk-ins-form__grid">
+                                        <div class="kk-ins-form__full">
+                                            <label for="kk-cat-name"><?php echo esc_html__('Navn', 'kontingentkalkulator'); ?></label>
+                                            <input id="kk-cat-name" type="text" placeholder="<?php echo esc_attr__('For eksempel Forsikringer', 'kontingentkalkulator'); ?>">
+                                            <p class="kk-admin-error" id="kk-cat-name-error" hidden><?php echo esc_html__('Skriv inn et navn.', 'kontingentkalkulator'); ?></p>
+                                        </div>
+                                        <div class="kk-ins-form__full">
+                                            <span class="kk-ins-form__label"><?php echo esc_html__('Beskrivelse', 'kontingentkalkulator'); ?></span>
+                                            <p class="kk-admin-hint kk-admin-hint--field"><?php echo esc_html__('Hvert felt blir et avsnitt på nettsiden.', 'kontingentkalkulator'); ?></p>
+                                            <div id="kk-cat-paragraphs" class="kk-cat-paras"></div>
+                                            <button type="button" class="button" id="kk-cat-para-add"><?php echo esc_html__('Legg til avsnitt', 'kontingentkalkulator'); ?></button>
+                                        </div>
+                                        <div>
+                                            <label for="kk-cat-link-text"><?php echo esc_html__('Lenketekst', 'kontingentkalkulator'); ?></label>
+                                            <input id="kk-cat-link-text" type="text" placeholder="<?php echo esc_attr__('Valgfritt', 'kontingentkalkulator'); ?>">
+                                        </div>
+                                        <div>
+                                            <label for="kk-cat-link-url"><?php echo esc_html__('Lenke-URL', 'kontingentkalkulator'); ?></label>
+                                            <input id="kk-cat-link-url" type="text" placeholder="https://">
+                                        </div>
+                                        <div class="kk-ins-form__actions">
+                                            <button type="button" class="button button-primary" id="kk-cat-save"><?php echo esc_html__('Legg til', 'kontingentkalkulator'); ?></button>
+                                            <button type="button" class="button" id="kk-cat-cancel"><?php echo esc_html__('Avbryt', 'kontingentkalkulator'); ?></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="kk-ins-form" id="kk-ben-form" hidden>
+                                    <p class="kk-admin-hint" id="kk-ben-form-context"></p>
+                                    <div class="kk-ins-form__grid">
+                                        <div class="kk-ins-form__full">
+                                            <label for="kk-ben-name"><?php echo esc_html__('Navn', 'kontingentkalkulator'); ?></label>
+                                            <input id="kk-ben-name" type="text" placeholder="<?php echo esc_attr__('For eksempel Innboforsikring', 'kontingentkalkulator'); ?>">
+                                            <p class="kk-admin-error" id="kk-ben-name-error" hidden><?php echo esc_html__('Skriv inn et navn.', 'kontingentkalkulator'); ?></p>
+                                        </div>
+                                        <div class="kk-ins-form__full">
+                                            <label for="kk-ben-description"><?php echo esc_html__('Beskrivelse', 'kontingentkalkulator'); ?></label>
+                                            <textarea id="kk-ben-description" rows="3" placeholder="<?php echo esc_attr__('Vises når noen trykker på (i)', 'kontingentkalkulator'); ?>"></textarea>
+                                        </div>
+                                        <div>
+                                            <label for="kk-ben-amount"><?php echo esc_html__('Sparing per år', 'kontingentkalkulator'); ?></label>
+                                            <div class="kk-admin-suffix">
+                                                <input id="kk-ben-amount" type="number" min="0" step="1" placeholder="0">
+                                                <span>kr</span>
+                                            </div>
+                                            <p class="kk-admin-error" id="kk-ben-amount-error" hidden><?php echo esc_html__('Skriv inn et beløp.', 'kontingentkalkulator'); ?></p>
+                                        </div>
+                                        <div>
+                                            <label for="kk-ben-group"><?php echo esc_html__('Eksklusiv gruppe', 'kontingentkalkulator'); ?></label>
+                                            <input id="kk-ben-group" type="text" placeholder="<?php echo esc_attr__('Valgfritt, f.eks. reise', 'kontingentkalkulator'); ?>">
+                                            <p class="kk-admin-hint kk-admin-hint--field"><?php echo esc_html__('Fordeler med samme gruppenavn i denne kategorien utelukker hverandre.', 'kontingentkalkulator'); ?></p>
+                                        </div>
+                                        <div class="kk-ins-form__full">
+                                            <label class="kk-admin-check" for="kk-ben-default">
+                                                <input id="kk-ben-default" type="checkbox">
+                                                <?php echo esc_html__('Huket av som standard på nettsiden', 'kontingentkalkulator'); ?>
+                                            </label>
+                                        </div>
+                                        <div class="kk-ins-form__actions">
+                                            <button type="button" class="button button-primary" id="kk-ben-save"><?php echo esc_html__('Legg til', 'kontingentkalkulator'); ?></button>
+                                            <button type="button" class="button" id="kk-ben-cancel"><?php echo esc_html__('Avbryt', 'kontingentkalkulator'); ?></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="kk-ben-list"></div>
+                            </div>
+                        </section>
+
                         <section class="kk-admin-panel" id="kk-panel-tekster" role="tabpanel" aria-labelledby="kk-tab-tekster" hidden>
                             <p class="kk-admin-hint"><?php echo esc_html__('La et felt stå tomt for å bruke standardteksten (vist som grå tekst). Gruppene følger oppsettet på nettsiden.', 'kontingentkalkulator'); ?></p>
                             <div class="kk-admin-card">
@@ -450,6 +592,16 @@ class KK_Settings
                                     ), $labels, $savedStrings, $defaults); ?>
                                 </div>
                             </div>
+                            <div class="kk-admin-card">
+                                <header>
+                                    <h2><?php echo esc_html__('Fordelskalkulator', 'kontingentkalkulator'); ?></h2>
+                                </header>
+                                <div class="kk-admin-card__body">
+                                    <?php self::render_string_fields(array(
+                                        'benefits_title', 'benefits_currency',
+                                    ), $labels, $savedStrings, $defaults); ?>
+                                </div>
+                            </div>
                         </section>
 
                         <section class="kk-admin-panel" id="kk-panel-forklaringer" role="tabpanel" aria-labelledby="kk-tab-forklaringer" hidden>
@@ -467,7 +619,7 @@ class KK_Settings
 
                     <aside class="kk-admin-preview" aria-label="<?php echo esc_attr__('Forhåndsvisning', 'kontingentkalkulator'); ?>">
                         <h3><?php echo esc_html__('Forhåndsvisning (slik det ser ut på nettsiden)', 'kontingentkalkulator'); ?></h3>
-                        <div class="kk-calculator kk-admin-calc" id="kk-preview">
+                        <div class="kk-calculator kk-admin-calc" id="kk-preview" data-kk-preview-kind="dues">
                             <div class="kk-input" data-kk-preview-input>
                                 <h3 class="kk-input__title" data-kk-hl="input_title"><?php echo esc_html($copy['input_title']); ?></h3>
                                 <p class="kk-input__help" data-kk-hl="input_help"><?php echo esc_html($copy['input_help']); ?></p>
@@ -544,7 +696,18 @@ class KK_Settings
                                 <p class="kk-result__note" data-kk-hl="note"><?php echo esc_html($copy['note']); ?></p>
                             </div>
                         </div>
-                        <p class="kk-admin-preview__note"><?php echo esc_html__('Eksemplet regner med verdiene du har satt til venstre. Prøv å endre lønn i forhåndsvisningen.', 'kontingentkalkulator'); ?></p>
+                        <p class="kk-admin-preview__note" data-kk-preview-note="dues"><?php echo esc_html__('Eksemplet regner med verdiene du har satt til venstre. Prøv å endre lønn i forhåndsvisningen.', 'kontingentkalkulator'); ?></p>
+                        <div class="kk-benefits kk-admin-benefits" id="kk-preview-benefits" hidden>
+                            <header class="kk-benefits__header">
+                                <p class="kk-benefits__kicker" data-kk-hl="benefits_title"><?php echo esc_html($copy['benefits_title']); ?></p>
+                                <p class="kk-benefits__total">
+                                    <span class="kk-benefits__currency" data-kk-hl="benefits_currency"><?php echo esc_html($copy['benefits_currency']); ?></span>
+                                    <span data-kk-ben-total>0</span>
+                                </p>
+                            </header>
+                            <div class="kk-benefits__body" id="kk-preview-benefits-body"></div>
+                        </div>
+                        <p class="kk-admin-preview__note" data-kk-preview-note="benefits" hidden><?php echo esc_html__('Huk av fordeler i forhåndsvisningen for å se totalt beløp. Standardavhuking settes på hver fordel.', 'kontingentkalkulator'); ?></p>
                     </aside>
                 </div>
                 <div class="kk-admin-bar">
@@ -648,6 +811,119 @@ class KK_Settings
         }
 
         return $out;
+    }
+
+    /**
+     * @param mixed $raw
+     * @return list<array{id: string, name: string, description: string, link_text: string, link_url: string, enabled: bool, items: list<array{id: string, name: string, description: string, amount: float, default_on: bool, enabled: bool, exclusive_group: string}>}>
+     */
+    private static function sanitize_benefit_categories($raw): array
+    {
+        if (is_string($raw)) {
+            $decoded = json_decode(wp_unslash($raw), true);
+            $raw = is_array($decoded) ? $decoded : array();
+        }
+        if (!is_array($raw)) {
+            return array();
+        }
+
+        $out = array();
+        $seen = array();
+        foreach ($raw as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $name = sanitize_text_field((string) ($item['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+            $id = sanitize_key((string) ($item['id'] ?? ''));
+            if ($id === '' || isset($seen[$id])) {
+                $id = 'cat_' . wp_generate_password(8, false, false);
+            }
+            $seen[$id] = true;
+            $out[] = array(
+                'id' => $id,
+                'name' => $name,
+                'description' => sanitize_textarea_field((string) ($item['description'] ?? '')),
+                'link_text' => sanitize_text_field((string) ($item['link_text'] ?? '')),
+                'link_url' => esc_url_raw((string) ($item['link_url'] ?? '')),
+                'enabled' => self::to_bool($item['enabled'] ?? true, true),
+                'items' => self::sanitize_benefit_items($item['items'] ?? array()),
+            );
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param mixed $raw
+     * @return list<array{id: string, name: string, description: string, amount: float, default_on: bool, enabled: bool, exclusive_group: string}>
+     */
+    private static function sanitize_benefit_items($raw): array
+    {
+        if (!is_array($raw)) {
+            return array();
+        }
+
+        $out = array();
+        $seen = array();
+        foreach ($raw as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $name = sanitize_text_field((string) ($item['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+            $id = sanitize_key((string) ($item['id'] ?? ''));
+            if ($id === '' || isset($seen[$id])) {
+                $id = 'ben_' . wp_generate_password(8, false, false);
+            }
+            $seen[$id] = true;
+            $out[] = array(
+                'id' => $id,
+                'name' => $name,
+                'description' => sanitize_textarea_field((string) ($item['description'] ?? '')),
+                'amount' => max(0, (float) (KK_Calc::number($item['amount'] ?? 0) ?? 0)),
+                'default_on' => self::to_bool($item['default_on'] ?? false, false),
+                'enabled' => self::to_bool($item['enabled'] ?? true, true),
+                'exclusive_group' => sanitize_text_field((string) ($item['exclusive_group'] ?? '')),
+            );
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param list<array{id: string, name: string, description: string, amount: float, default_on: bool, enabled: bool, exclusive_group: string}> $items
+     * @return list<array{id: string, name: string, description: string, amount: float, default_on: bool, enabled: bool, exclusive_group: string}>
+     */
+    private static function resolve_exclusive_defaults(array $items): array
+    {
+        $seen = array();
+        foreach ($items as $index => $item) {
+            $group = trim((string) ($item['exclusive_group'] ?? ''));
+            if ($group === '' || empty($item['default_on'])) {
+                continue;
+            }
+            if (isset($seen[$group])) {
+                $items[$index]['default_on'] = false;
+            } else {
+                $seen[$group] = true;
+            }
+        }
+
+        return $items;
+    }
+
+    private static function to_bool(mixed $value, bool $default = false): bool
+    {
+        if ($value === null) {
+            return $default;
+        }
+
+        return $value === true || $value === 1 || $value === '1' || $value === 'true';
     }
 
     /**

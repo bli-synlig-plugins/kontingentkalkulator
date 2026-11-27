@@ -2,8 +2,8 @@
 /**
  * Plugin Name:         Kontingentkalkulator
  * Plugin URI:          https://wordpress-plugins-docs.vercel.app/plugins/kontingentkalkulator
- * Description:         Flatsome UX Builder-element som regner ut reell kontingent ut fra månedslønn eller timelønn.
- * Version:             1.0.2
+ * Description:         Flatsome UX Builder-elementer for reell kontingent og årlig sparing på medlemsfordeler.
+ * Version:             1.1.0
  * Requires at least:   6.6
  * Requires PHP:        8.1
  * Author:              Benjamin
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KK_VERSION', '1.0.2');
+define('KK_VERSION', '1.1.0');
 define('KK_PLUGIN_FILE', __FILE__);
 define('KK_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('KK_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -28,5 +28,6 @@ require_once KK_PLUGIN_DIR . 'includes/class-kk-plugin.php';
 require_once KK_PLUGIN_DIR . 'includes/elements/class-kk-calculator.php';
 require_once KK_PLUGIN_DIR . 'includes/elements/class-kk-input.php';
 require_once KK_PLUGIN_DIR . 'includes/elements/class-kk-result.php';
+require_once KK_PLUGIN_DIR . 'includes/elements/class-kk-benefits.php';
 
 add_action('plugins_loaded', array('KK_Plugin', 'init'));

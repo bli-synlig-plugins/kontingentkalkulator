@@ -245,6 +245,18 @@ abstract class KK_Element
         return '<svg class="kk-info__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
     }
 
+    protected function chevron_icon(): string
+    {
+        if (shortcode_exists('wp_icon')) {
+            $svg = trim(do_shortcode('[wp_icon library="lucide" name="chevron-right" size="24" color="var(--primary-color)" class="wpicons-inline"]'));
+            if ($svg !== '' && str_contains($svg, '<svg')) {
+                return $svg;
+            }
+        }
+
+        return '<svg style="width:24px;height:24px" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="wpicons wpicons--lucide lucide lucide-chevron-right-icon lucide-chevron-right wpicons-inline"><path d="m9 18 6-6-6-6"></path></svg>';
+    }
+
     protected function sanitize_color(string $color): string
     {
         $color = trim($color);

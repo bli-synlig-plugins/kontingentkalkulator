@@ -161,6 +161,23 @@
 	margin: 0 0 14px;
 }
 
+.kk-admin-hint--field {
+	margin: 6px 0 0;
+}
+
+.kk-admin-check {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 600;
+	padding-top: 8px;
+}
+
+.kk-admin-check input {
+	width: auto;
+	margin: 0;
+}
+
 .kk-admin-error {
 	color: var(--kk-admin-dng);
 	font-size: 12.5px;
@@ -208,11 +225,45 @@
 	grid-column: 1 / -1;
 }
 
-.kk-ins-form label {
+.kk-ins-form label,
+.kk-ins-form__label {
 	display: block;
 	margin-bottom: 4px;
 	font-weight: 600;
 	font-size: 13.5px;
+}
+
+.kk-cat-paras {
+	display: grid;
+	gap: 8px;
+	margin: 8px 0 10px;
+}
+
+.kk-cat-para {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 8px;
+	align-items: start;
+}
+
+.kk-cat-para textarea {
+	width: 100%;
+	min-height: 4.5em;
+	resize: vertical;
+}
+
+.kk-cat-para__remove {
+	margin-top: 2px;
+}
+
+.kk-cat-para__remove[hidden] {
+	display: none !important;
+}
+
+.kk-ben-cat__copy p {
+	margin: 4px 0 0;
+	color: var(--kk-admin-mut);
+	font-size: 13px;
 }
 
 .kk-ins-form__actions {
@@ -269,6 +320,124 @@
 	background: #f6f7f7;
 	border-radius: 0 0 8px 8px;
 	font-weight: 600;
+}
+
+.kk-ben-cat {
+	border-bottom: 1px solid var(--kk-admin-line);
+}
+
+.kk-ben-cat:last-child {
+	border-bottom: 0;
+}
+
+.kk-ben-cat.is-off {
+	opacity: 0.55;
+}
+
+.kk-ben-cat__head {
+	display: grid;
+	gap: 8px;
+	padding: 16px 20px 12px;
+}
+
+.kk-ben-cat__head h3 {
+	margin: 0;
+	font-size: 15px;
+}
+
+.kk-ben-cat__head p {
+	margin: 4px 0 0;
+	color: var(--kk-admin-mut);
+	font-size: 13px;
+}
+
+.kk-ben-cat__link {
+	color: var(--kk-admin-acc);
+}
+
+.kk-ben-cat__items {
+	border-top: 1px solid var(--kk-admin-line);
+	background: #f8f9fa;
+}
+
+.kk-ben-item {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 6px 16px;
+	align-items: center;
+	padding: 12px 20px 12px 32px;
+	border-bottom: 1px solid var(--kk-admin-line);
+}
+
+.kk-ben-item:last-child {
+	border-bottom: 0;
+}
+
+.kk-ben-item.is-off {
+	opacity: 0.55;
+}
+
+.kk-ben-item h4 {
+	margin: 0;
+	font-size: 14px;
+}
+
+.kk-ben-item p {
+	margin: 2px 0 0;
+	color: var(--kk-admin-mut);
+	font-size: 12.5px;
+}
+
+.kk-ben-item__meta {
+	font-weight: 500;
+}
+
+.kk-ben-empty {
+	padding: 14px 20px 16px 32px;
+	color: var(--kk-admin-mut);
+	font-size: 13px;
+}
+
+#kk-ben-form-context {
+	margin: 12px 0 0;
+	padding: 0 0 0;
+	font-weight: 600;
+	color: var(--kk-admin-ink);
+}
+
+.kk-admin-benefits.kk-benefits {
+	border: 1px solid var(--kk-admin-line);
+	border-radius: 8px;
+	overflow: hidden;
+	font-size: 13.5px;
+}
+
+.kk-admin-benefits .kk-benefits__kicker {
+	font-size: 14px;
+}
+
+.kk-admin-benefits .kk-benefits__total {
+	font-size: 28px;
+}
+
+.kk-admin-benefits .kk-benefits__cat-title {
+	font-size: 16px;
+}
+
+.kk-admin-benefits .kk-info__btn {
+	width: 15px;
+	height: 15px;
+	border: 1.2px solid currentColor;
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 1;
+	opacity: 1;
+}
+
+.kk-admin-benefits[hidden],
+.kk-admin-calc[hidden],
+[data-kk-preview-note][hidden] {
+	display: none !important;
 }
 
 .kk-admin-preview h3 {

@@ -13,6 +13,7 @@ class KK_Plugin
         KK_Calculator::instance();
         KK_Input::instance();
         KK_Result::instance();
+        KK_Benefits::instance();
 
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_front'));
         add_action('ux_builder_enqueue_scripts', array(__CLASS__, 'enqueue_builder'));
